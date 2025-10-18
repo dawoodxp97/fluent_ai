@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+  backend:
+    build:
+      context: ./backend
+    environment:
+      - PORT=8001
+      - REDIS_URL=redis://redis:6379/0
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3002
+      - PROVIDER=openai
+      - MODEL=gpt-4o-mini
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+    ports:
+      - "8001:8001"
+    depends_on:
+      - redis
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
